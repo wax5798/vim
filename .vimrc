@@ -37,7 +37,8 @@ set cuc
 set shortmess=atI   " 启动的时候不显示那个援助乌干达儿童的提示  
 set go=             " 不要图形按钮  
 "color desert     " 设置背景主题  
-color ron     " 设置背景主题  
+"color ron     " 设置背景主题  
+colorscheme desert
 "color torte     " 设置背景主题  
 "set guifont=Courier_New:h10:cANSI   " 设置字体  
 "autocmd InsertLeave * se nocul  " 用浅色高亮当前行  
@@ -46,6 +47,7 @@ set ruler           " 显示标尺
 set showcmd         " 输入的命令显示出来，看的清楚些  
 "set whichwrap+=<,>,h,l   " 允许backspace和光标键跨越行边界(不建议)  
 set scrolloff=3     " 光标移动到buffer的顶部和底部时保持3行距离  
+set scroll=15               " 可以使用ctrl-d, ctrl-u来让屏幕上下滚动scroll指定行数
 set statusline=%F%m%r%h%w\ [FORMAT=%{&ff}]\ [TYPE=%Y]\ [POS=%l,%v][%p%%]\ %{strftime(\"%d/%m/%y\ -\ %H:%M\")}   "状态行显示的内容  
 set laststatus=2    " 启动显示状态行(1),总是显示状态行(2)  
 "set foldenable      " 允许折叠  
@@ -165,6 +167,9 @@ autocmd BufNewFile * normal G
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "键盘命令
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+let mapleader=","
+noremap \ ,
+
 :nmap <silent> <F9> <ESC>:Tlist<RETURN>
 " shift tab pages
 map <S-Left> :tabp<CR>
@@ -184,6 +189,7 @@ imap <C-a> <Esc>^
 imap <C-e> <Esc>$
 vmap <C-c> "+y
 set mouse=v
+nnoremap <C-n> <C-d>
 "set clipboard=unnamed
 "去空行  
 nnoremap <F2> :g/^\s*$/d<CR> 
@@ -235,7 +241,7 @@ endfunc
 
 "代码格式优化化
 
-map <F6> :call FormartSrc()<CR><CR>
+" map <F6> :call FormartSrc()<CR><CR>
 
 "定义FormartSrc()
 func FormartSrc()
@@ -351,6 +357,7 @@ set scrolloff=3
 ""	endif
 ""endfunction
 filetype plugin indent on 
+au FileType * setlocal formatoptions-=c formatoptions-=r formatoptions-=o "取消自动注释,这条配置需要放在filetype indent on 之后，否则无效???
 "打开文件类型检测, 加了这句才可以用智能补全
 set completeopt=longest,menu
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -364,7 +371,7 @@ let Tlist_Exist_OnlyWindow = 1  " 如果只有一个buffer，kill窗口也kill�
 ""let Tlist_Enable_Fold_Column = 0    " 不要显示折叠树  
 "let Tlist_Show_One_File=1            "不同时显示多个文件的tag，只显示当前文件的
 "设置tags  
-set tags=tags;  
+set tags=tags;
 set autochdir 
 
 
@@ -417,21 +424,42 @@ Bundle 'gmarik/vundle'
 
 " My Bundles here:
 "
-" original repos on github
+" vim-fugitive: Git wrapper 常用命令:Gdiff, help fugitive.txt获取帮助
 Bundle 'tpope/vim-fugitive'
+set statusline+=%{fugitive#statusline()}    " show Git hotness
+
 Bundle 'rstacruz/sparkup', {'rtp': 'vim/'}
+
+" indentLine: 缩进对齐线
 Bundle 'Yggdroot/indentLine'
+set t_Co=256
 let g:indentLine_char = '┊'
+
 "ndle 'tpope/vim-rails.git'
 " vim-scripts repos
+
+" L9: vim-scripts repos
 Bundle 'L9'
+
+" vim-scripts/a.vim: :A切换到相应的C文件或H文件，:AV, :AS分割窗口并打开文件
+Plugin 'vim-scripts/a.vim' 
+
+" vim-scripts/grep.vim: Grep search tools integration with Vim
+Plugin 'vim-scripts/grep.vim'
+" 常用命令:Grep, GrepArgs 
+" nnoremap <silent> <F3> :Rgrep<CR>
+
+" FuzzyFinder: 文件查找, 功能很强大，具体有待研究???太久没人维护了，是否有其它替代插件
 Bundle 'FuzzyFinder'
+
 " non github repos
 Bundle 'https://github.com/wincent/command-t.git'
-Bundle 'Auto-Pairs'
+
+" Bundle 'Auto-Pairs'
+
+" python-imports: This VIM plugin automates the insertion of import statements at the top of a file.
 Bundle 'python-imports.vim'
 Bundle 'CaptureClipboard'
-Bundle 'ctrlp-modified.vim'
 Bundle 'last_edit_marker.vim'
 Bundle 'synmark.vim'
 "Bundle 'Python-mode-klen'
@@ -442,13 +470,40 @@ Bundle 'Javascript-OmniCompletion-with-YUI-and-j'
 Bundle 'jslint.vim'
 Bundle "pangloss/vim-javascript"
 Bundle 'Vim-Script-Updater'
-Bundle 'ctrlp.vim'
+
+" displays tags in a window, ordered by scope???conflict with nerdtree and winmanager
+Bundle 'majutsushi/tagbar'  
+let g:tagbar_width=35       
+let g:tagbar_autofocus=1    
+nmap <F6> :TagbarToggle<CR>
+
+" ctrlp-modified.vim: Easily open locally modified files in your git-versioned projects
+Bundle 'ctrlp-modified.vim'
+" shows all files which have been modified since your last commit
+" map <Leader>m :CtrlPModified<CR> "conflict with mark.vim
+" shows all files modified on your current branch
+" map <Leader>M :CtrlPBranch<CR>
+
+" kien/ctrlp.vim: Fuzzy file, buffer, mru, tag, etc finder.
+" 使用<C-p>调用CtrlP, 帮助条目:trlp-commands, trlp-extensions, ctrlp-mappings
+" 只能在当前工作目录下查找吗???
+Bundle 'kien/ctrlp.vim'
+set wildignore+=*/tmp/*,*.so,*.swp,*.zip,*.pyc,*.png,*.jpg,*.gif,*.o,*.ko,*.a,*.zip,*.exe
+let g:ctrlp_custom_ignore = '\v[\/]\.(git|hg|svn)$'
+let g:ctrlp_custom_ignore = '\v\.(exe|so|dll)$'
+let g:ctrlp_extensions = ['funky']
+
 Bundle 'tacahiroy/ctrlp-funky'
 Bundle 'jsbeautify'
 Bundle 'The-NERD-Commenter'
 "django
 Bundle 'django_templates.vim'
 Bundle 'Django-Projects'
+
+" EasyMotion: 一个快速跳转工具
+" 使用空格 + {w,f,F,b,e}
+Plugin 'EasyMotion'
+let g:EasyMotion_leader_key='<Space>'
 
 "Bundle 'FredKSchott/CoVim'
 "Bundle 'djangojump'
@@ -461,8 +516,6 @@ filetype plugin indent on     " required!
 "
 "ctrlp设置
 "
-set wildignore+=*/tmp/*,*.so,*.swp,*.zip,*.pyc,*.png,*.jpg,*.gif     " MacOSX/Linux
-set wildignore+=*\\tmp\\*,*.swp,*.zip,*.exe,*.pyc,*.png,*.jpg,*.gif  " Windows
 
 let g:ctrlp_custom_ignore = '\v[\/]\.(git|hg|svn)$'
 let g:ctrlp_custom_ignore = '\v\.(exe|so|dll)$'
